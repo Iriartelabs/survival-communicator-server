@@ -109,7 +109,7 @@ router.post('/users/login', async (req, res) => {
   }
 });
 
-// Ruta para buscar un usuario por nombre
+// Ruta para buscar usuario por nombre
 router.get('/users/find/:username', async (req, res) => {
   try {
     const { username } = req.params;
@@ -216,7 +216,7 @@ router.post('/users/sync', async (req, res) => {
   }
 });
 
-//  Ruta para obtener nodos conocidos
+// Ruta para obtener nodos conocidos
 router.get('/nodes', async (req, res) => {
   try {
     const nodes = await getAllNodes();
@@ -248,6 +248,29 @@ router.get('/ping', (req, res) => {
     message: 'pong',
     nodeName: process.env.NODE_NAME || 'UnnamedNode'
   });
+});
+
+// Añadir compatibilidad con la ruta directa de usuarios
+router.get('/users/:username', async (req, res) => {
+  try {
+    const { username } = req.params;
+    
+    // Buscar el usuario
+    const user = await getUserByUsername(username);
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    
+    res.json({
+      id: user.id,
+      username: user.username,
+      publicKey: user.public_key,
+      lastSeen: user.last_seen
+    });
+  } catch (error) {
+    console.error('Error al buscar usuario:', error.message);
+    res.status(500).json({ error: 'Error al buscar usuario' });
+  }
 });
 
 module.exports = router;
