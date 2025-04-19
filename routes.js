@@ -27,9 +27,11 @@ function authenticateToken(req, res, next) {
 // Ruta para registrar un nuevo usuario
 router.post('/users/register', async (req, res) => {
   try {
-    const { username, publicKey } = req.body;
+    // Acepta ambos: publicKey (camelCase) y public_key (snake_case)
+    const { username, publicKey, public_key } = req.body;
+    const pubKey = publicKey || public_key;
     
-    if (!username || !publicKey) {
+    if (!username || !pubKey) {
       return res.status(400).json({ error: 'Nombre de usuario y clave pública son requeridos' });
     }
     
@@ -43,7 +45,7 @@ router.post('/users/register', async (req, res) => {
     const userId = crypto.randomBytes(16).toString('hex');
     
     // Crear el usuario
-    const user = await createUser(userId, username, publicKey);
+    const user = await createUser(userId, username, pubKey);
     
     // Generar token JWT
     const token = jwt.sign(
@@ -57,7 +59,7 @@ router.post('/users/register', async (req, res) => {
       user: {
         id: userId,
         username,
-        publicKey
+        publicKey: pubKey
       },
       token
     });
@@ -214,7 +216,7 @@ router.post('/users/sync', async (req, res) => {
   }
 });
 
-// Ruta para obtener nodos conocidos
+//  Ruta para obtener nodos conocidos
 router.get('/nodes', async (req, res) => {
   try {
     const nodes = await getAllNodes();
@@ -233,6 +235,10 @@ router.get('/nodes', async (req, res) => {
     console.error('Error al obtener nodos:', error.message);
     res.status(500).json({ error: 'Error al obtener nodos' });
   }
+});
+
+router.delete('/users/:id', async (req, res) => {
+  // ...elimina el usuario con ese id...
 });
 
 // Ruta de heartbeat/ping (útil para comprobar conectividad)
