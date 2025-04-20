@@ -42,6 +42,7 @@ const server = app.listen(PORT, () => {
   
   // Configurar sincronización entre nodos
   setupSync();
+  setupWebSocket(server);
 });
 
 // Manejo de errores y cierre gracioso
